@@ -1,0 +1,449 @@
+#include<fstream.h>
+#include<conio.h>
+#include<stdio.h>
+#include<stdlib.h>
+#include<process.h>
+#include<iomanip.h>
+#include<string.h>
+#include<dos.h>
+
+class players
+{
+   int jno;          //jersey number
+   int rat;         //player's rating
+   int rsal;        //salary acc. to rating
+   char name[20];     //player's name
+   int age;          //player's age
+   char club[50];    //previous club
+   char position[30];     //player's playing position
+   float basic;         //salary acc. to playing position
+   float tsal;      //total salary
+   void calculate();
+
+   public:
+
+   void getdata();
+   void putdata();
+   void modify();
+   int retjno(){ return jno;}
+}P;
+
+void menu();
+
+void players::calculate()
+{
+   if(strcmpi(position,"striker")==0)
+    basic=50000;
+    else
+   if(strcmpi(position,"defender")==0)
+    basic=40000;
+    else
+   if(strcmpi(position,"midfielder")==0)
+    basic=45000;
+    else
+   if(strcmpi(position,"goalkeeper")==0)
+    basic=47000;
+    else
+    basic=35000;
+rsal=rat*100;    //salary acc. to rating
+tsal=basic+rsal;
+}
+
+
+void players::getdata()
+{
+  clrscr();
+  cout<<"Enter Jersey Number: ";
+  cin>>jno;
+  cout<<"\n\nEnter name: ";
+  gets(name);
+  cout<<"\n\nEnter AGE: ";
+  cin>>age;
+  cout<<"\n\nEnter position(striker/defender/midfielder/goalkeeper): ";
+  gets(position);
+  cout<<"\n\nEnter former club: ";
+  gets(club);
+  cout<<"\n\nEnter player rating(acc. to FIFA/PES): ";
+  cin>>rat;
+  calculate();
+  getch();
+}
+
+void players::putdata()
+{
+  clrscr();
+  cout<<"**************************PLAYER RECORDS****************************";
+  cout<<"\n\nJersey Number: "<<jno;
+  cout<<"\n\nName: "<<name;
+  cout<<"\n\nAGE: "<<age;
+  cout<<"\n\nPosition: "<<position;
+  cout<<"\n\nFormer Club: "<<club;
+  cout<<"\n\nRating: "<<rat;
+  cout<<"\n\t\t\nTOTAL WAGE DETAILS ";
+  cout<<"\n--------------------------------------------------------";
+  cout<<"\n\nBasic: "<<basic;
+  cout<<"\n\nRSAL: "<<rsal;
+  cout<<"\n\nTOTAL SALARY: "<<tsal;
+
+}
+
+void buy()
+{
+  char ch;
+  ofstream f("PLAYERS.dat",ios::out|ios::binary|ios::app);
+  do{
+    P.getdata();
+    f.write((char*)&P,sizeof(P));
+    cout<<"\n\nWant to buy more players...(y/n)???";
+    cin>>ch;
+    }while(ch=='y'||ch=='Y');
+    f.close();
+  menu();
+}
+void show()
+{
+ int c=0;
+  ifstream f("PLAYERS.dat",ios::in);
+  while(f.read((char*)&P,sizeof(P)))
+  {
+    P.putdata();
+    c++;
+    cout<<"\nPress any key to continue...";
+    getch();
+  }
+  if(c==0)
+  {
+  cout<<"File is empty.....\n";
+  }
+  else
+  {
+  cout<<"\nTotal number of players present in the team is......"<<c<<endl;
+  }
+ getch();
+ menu();
+}
+
+void players::modify()
+{
+  clrscr();
+  int jerno,found=0;
+  cout<<"\n\nENTER JERSEY NO. WHOSE RECORD YOU WANT TO MODIFY: ";
+  cin>>jerno;
+  ifstream f("PLAYERS.dat",ios::in);
+  ofstream f1("temp.dat",ios::out|ios::binary|ios::app);
+  while(f.read((char*)&P,sizeof(P)))
+  {
+    if(jerno!=P.retjno())
+      f1.write((char*)&P,sizeof(P));
+    else
+     {
+	found=1;
+	char ch;
+	cout<<"Jersey No.: "<<jerno;
+	cout<<"\t\tChange(y/n)";
+	cin>>ch;
+	if(ch=='y'||ch=='Y')
+	cin>>jno;
+	cout<<"\n\nName: "<<name;
+	cout<<"\t\tChange(y/n)";
+	cin>>ch;
+	if(ch=='y'||ch=='Y')
+	gets(name);
+	cout<<"\n\nAGE: "<<age;
+	cout<<"\t\tChange(y/n)";
+	cin>>ch;
+	if(ch=='y'||ch=='Y')
+	cin>>age;
+	cout<<"\n\nPosition : "<<position;
+	cout<<"\t\tChange(y/n)";
+	cin>>ch;
+	if(ch=='y'||ch=='Y')
+	gets(position);
+	cout<<"\n\nRating : "<<rat;
+	cout<<"\t\tChange(y/n)";
+	cin>>ch;
+	if(ch=='y'||ch=='Y')
+	cin>>rat;
+	cout<<"\n\nFormer Club : "<<club;
+	cout<<"\t\tchange(y/n)";
+	cin>>ch;
+	if(ch=='y'||ch=='Y')
+	gets(club);
+     calculate();
+     f1.write((char*)&P,sizeof(P));
+    }
+  }
+f.close();
+f1.close();
+remove("PLAYERS.dat");
+rename("temp.dat","PLAYERS.dat");
+if(found==0)
+{
+cout<<"PLAYER NOT FOUND.........";
+}
+if(found==1)
+cout<<"\n\n\nPLAYER'S RECORD MODIFIED............PRESS ANY KEY TO CONTINUE...";
+getch();
+menu();
+}
+void sell()
+{
+  clrscr();
+  int jno;
+  char ch;
+  int found=0;
+  cout<<"\n\nEnter player's jersey no. whom you want to sell: ";
+  cin>>jno;
+  ifstream f("PLAYERS.dat",ios::in);
+  ofstream f1("temp.dat",ios::out|ios::binary|ios::app);
+  while(f.read((char*)&P,sizeof(P)))
+  {
+    if(jno!=P.retjno())
+      f1.write((char*)&P,sizeof(P));
+    else
+     {
+       P.putdata();
+       cout<<"\n\nAre you sure you want to sell this player(y/n)?";
+       cin>>ch;
+       if(ch=='y'||ch=='Y')
+	found=1;
+       else
+	f1.write((char*)&P,sizeof(P));
+     }
+  }
+  if(found==0)
+   cout<<"\n\nplayer not sold or not found...";
+  else
+   cout<<"\n\nPlayer sold...";
+  f.close();
+  f1.close();
+  remove("PLAYERS.dat");
+  rename("temp.dat","PLAYERS.dat");
+  getch();
+  menu();
+}
+void search()
+{
+  clrscr();
+  int jno,found=0;
+  cout<<"\n\nEnter the player's Jersey No. whose record u want to Search: ";
+  cin>>jno;
+  ifstream f("PLAYERS.dat",ios::in);
+  while(f.read((char*)&P,sizeof(P)))
+  {
+    if(jno==P.retjno())
+      {
+      P.putdata();
+      found=1;
+      }
+  }
+  if(found==0)
+  cout<<"\n\nPlayer not found...";
+ f.close();
+ getch();
+ menu();
+}
+void playgame()
+{
+clrscr();
+fstream fin("players.dat",ios::in|ios::out|ios::binary);
+fin.read((char*)&P,sizeof(P));
+if(fin.tellg()==0)
+{
+cout<<"PLEASE BUY ATLEAST ONE PLAYER FIRST...\n";
+getch();
+menu();
+}
+int k,z=0,r;
+int mygoal;         //all stars club goals
+int ogoal;          //opponent team goals
+int mypos;          //all stars club possession
+int opos;           //opponent team possession
+int myfoul;         //all stars club fouls
+int ofoul;          //opponent team fouls
+int myshot;        //all stars club shots taken
+int oshot;         //opponent team shots taken
+int mytac;          //all stars club tackles
+int otac;           //opponent team tackles
+int mysave;         //all stars club saves made
+int osave;          //opponent club saves made
+char result[30];    //result of the match
+char a[15][30]={"ARSENAL","REAL MADRID","JUVENTUS","NAPOLI","CHELSEA",
+    "MANCHESTER CITY","MANCHESTER UNITED","AC MILAN","BARCELONA","LIVERPOOL",
+    "BORUSSIA DORTMUND","LYON","BAYERN MUNICH","INTER MILAN","SEVILLA"};
+gotoxy(25,5);
+cout<<"CHOOSE A TEAM TO PLAY AGAINST\n";
+for(int i=0;i<15;i++)
+{
+gotoxy(29,7+i);
+cout<<++z<<". "<<a[i]<<endl;
+}
+gotoxy(37,22);
+cout<<"OR\n";
+gotoxy(29,23);
+cout<<++z<<". R A N D O M"<<endl;
+gotoxy(26,24);
+cout<<"Enter your choice (1-16)....\n";
+cin>>k;
+randomize();
+r=random(16);
+mygoal=random(5);
+ogoal=random(5);
+myshot=random(20);
+oshot=random(20);
+mysave=random(10);
+osave=random(10);
+mytac=random(25);
+otac=random(25);
+myfoul=random(15);
+ofoul=random(15);
+mypos=random(100);
+opos=100-mypos;
+clrscr();
+if(k>=1&&k<=16)
+{
+gotoxy(15,5);
+cout<<"PLEASE WAIT........The match is now being played\n";
+for(int b=0;b<5;b++)
+{
+gotoxy(17,6+b);
+cout<<char(25)<<"\t"<<char(25)<<"\t"<<char(25)<<"\t"<<char(25)
+<<"\t"<<char(25)<<"\t"<<char(25)<<endl;
+delay(1000);
+}
+for(b=5;b>0;b--)
+{
+gotoxy(18,11);
+cout<<"AND THE MATCH WILL BE OVER IN "<<b<<" SECONDS\n";
+delay(1000);
+}
+clrscr();
+for(b=0;b<75;b++)
+{
+gotoxy(4+b,4);
+cout<<"*";
+}
+for(b=0;b<12;b++)
+{
+gotoxy(78,4+b);
+cout<<"*";
+}
+for(b=0;b<75;b++)
+{
+gotoxy(4+b,15);
+cout<<"*";
+}
+if(k==16)
+goto A;
+gotoxy(6,6);
+ cout<<"ALL STARS CLUB"<<setw(22)<<"VS"<<setw(34)<<a[k-1]<<endl;
+ cout<<setw(11)<<mygoal<<setw(35)<<"GOALS SCORED"<<setw(25)<<ogoal<<endl;
+ cout<<setw(11)<<mypos<<"%"<<setw(34)<<"POSSESSION"<<setw(25)<<opos<<"%"<<endl;
+ cout<<setw(11)<<myshot<<setw(34)<<"SHOTS TAKEN"<<setw(26)<<oshot<<endl;
+ cout<<setw(11)<<myfoul<<setw(32)<<"FOULS"<<setw(28)<<ofoul<<endl;
+ cout<<setw(11)<<mytac<<setw(33)<<"TACKLES"<<setw(27)<<otac<<endl;
+ cout<<setw(11)<<mysave<<setw(32)<<"SAVES"<<setw(28)<<osave<<endl;
+ cout<<endl;
+ if(k==16)
+ {
+A: gotoxy(6,6);
+ cout<<"ALL STARS CLUB"<<setw(22)<<"VS"<<setw(34)<<a[r]<<endl;
+ cout<<setw(11)<<mygoal<<setw(35)<<"GOALS SCORED"<<setw(25)<<ogoal<<endl;
+ cout<<setw(11)<<mypos<<"%"<<setw(34)<<"POSSESSION"<<setw(25)<<opos<<"%"<<endl;
+ cout<<setw(11)<<myshot<<setw(34)<<"SHOTS TAKEN"<<setw(26)<<oshot<<endl;
+ cout<<setw(11)<<myfoul<<setw(32)<<"FOULS"<<setw(28)<<ofoul<<endl;
+ cout<<setw(11)<<mytac<<setw(33)<<"TACKLES"<<setw(27)<<otac<<endl;
+ cout<<setw(11)<<mysave<<setw(32)<<"SAVES"<<setw(28)<<osave<<endl;
+ cout<<endl;
+ }
+ if(mygoal>ogoal)
+ strcpy(result,"ALLSTARS WON THE MATCH");
+ else
+ if(mygoal<ogoal)
+ strcpy(result,"ALLSTARS LOST THE MATCH");
+ else
+ if(mygoal==ogoal)
+ strcpy(result,"      MATCH DRAWN      ");
+ cout<<setw(53)<<result;
+for(b=0;b<12;b++)
+{
+gotoxy(4,4+b);
+cout<<"*";
+}
+getch();
+}
+else
+{
+cout<<"Wrong choice............Enter again\n";
+getch();
+return;
+}
+menu();
+getch();
+}
+
+void menu()
+{
+  clrscr();
+  int ch;
+  do
+  {
+  clrscr();
+  cout<<"\n\t\tMENU\n\n";
+  cout<<"\n1. BUY NEW PLAYER";
+  cout<<"\n\n2. SHOW ALL PLAYERS ";
+  cout<<"\n\n3. MODIFY THE DETAILS OF A PLAYER";
+  cout<<"\n\n4. SELL A PLAYER";
+  cout<<"\n\n5. SEARCH A PLAYER";
+  cout<<"\n\n6. PLAY A MATCH";
+  cout<<"\n\n7. QUIT";
+ cout<<"\n\n\nENTER YOUR CHOICE: ";
+ cin>>ch;
+ switch(ch)
+ {
+ case 1: buy();
+ break;
+ case 2: show();
+	break;
+ case 3: P.modify();
+	break;
+ case 4: sell();
+	 break;
+  case 5: search();
+	 break;
+  case 6: playgame();
+	 break;
+  case 7: exit(0);
+	 break;
+  default: cout<<"WRONG CHOICE ENTERED.......ENTER AGAIN";
+  getch();
+  }
+  }
+  while(ch!=7);
+}
+void welcome()
+{
+
+	clrscr();
+	gotoxy(13,10);
+	cout<<"**************** W E L C O M E  *********************** ";
+	gotoxy(18,12);
+	cout<<"*** T O   A L L S T A R S   F O O T B A L L  *** " ;
+	gotoxy(13,14);
+	cout<<"*********** C L U B  M A N A G E M E N T  *********** ";
+	gotoxy(28,16);
+	gotoxy(10,20);
+	cout<<" ";
+	gotoxy(15,30);
+	cout<<" *** PRESS ANY KEY TO CONTINUE***";
+	getch();
+}
+
+void main()
+{
+  clrscr();
+  textcolor(GREEN);
+  welcome();
+  menu();
+  getch();
+}
